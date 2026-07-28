@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/BlockFiles/">
+    <File Path="pro-onlydomains-blocklist.txt" />
+    <File Path="ultimate-blocklist-onlydomains.txt" />
+  </Folder>
+  <Folder Name="/SolutionFiles/">
+    <File Path=".gitignore" />
+    <File Path="LICENSE" />
+  </Folder>
+  <Project Path="DNS-BlockList-Cleaner/DNS-BlockList-Cleaner.csproj" />
+</Solution>
