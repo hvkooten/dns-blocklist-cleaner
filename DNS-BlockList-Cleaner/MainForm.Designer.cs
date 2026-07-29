@@ -53,7 +53,14 @@
             txtLog = new TextBox();
             lblDomainFilter = new Label();
             btnAbout = new Button();
+            btnCopyToPattern = new Button();
+            btnCopyToFilter = new Button();
+            splitMain = new SplitContainer();
             grpRules.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
+            splitMain.Panel1.SuspendLayout();
+            splitMain.Panel2.SuspendLayout();
+            splitMain.SuspendLayout();
             SuspendLayout();
             // 
             // lblSourceUrl
@@ -101,14 +108,14 @@
             lblInfo.AutoEllipsis = true;
             lblInfo.Location = new Point(12, 43);
             lblInfo.Name = "lblInfo";
-            lblInfo.Size = new Size(772, 20);
+            lblInfo.Size = new Size(772, 34);
             lblInfo.TabIndex = 4;
             lblInfo.Text = "No blocklist loaded.";
             // 
             // lblDomainsInfo
             // 
             lblDomainsInfo.AutoSize = true;
-            lblDomainsInfo.Location = new Point(12, 94);
+            lblDomainsInfo.Location = new Point(0, 26);
             lblDomainsInfo.Name = "lblDomainsInfo";
             lblDomainsInfo.Size = new Size(105, 15);
             lblDomainsInfo.TabIndex = 5;
@@ -117,10 +124,10 @@
             // txtDomainFilter
             // 
             txtDomainFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtDomainFilter.Location = new Point(87, 67);
+            txtDomainFilter.Location = new Point(75, 0);
             txtDomainFilter.Name = "txtDomainFilter";
             txtDomainFilter.PlaceholderText = "Filter domains...";
-            txtDomainFilter.Size = new Size(363, 23);
+            txtDomainFilter.Size = new Size(303, 23);
             txtDomainFilter.TabIndex = 6;
             txtDomainFilter.TextChanged += txtDomainFilter_TextChanged;
             // 
@@ -129,14 +136,13 @@
             lstDomains.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             lstDomains.FormattingEnabled = true;
             lstDomains.IntegralHeight = false;
-            lstDomains.Location = new Point(12, 112);
+            lstDomains.Location = new Point(0, 44);
             lstDomains.Name = "lstDomains";
-            lstDomains.Size = new Size(438, 433);
+            lstDomains.Size = new Size(438, 421);
             lstDomains.TabIndex = 7;
             // 
             // grpRules
             // 
-            grpRules.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             grpRules.Controls.Add(lblPattern);
             grpRules.Controls.Add(txtPattern);
             grpRules.Controls.Add(lblMatchType);
@@ -146,9 +152,10 @@
             grpRules.Controls.Add(btnEditRule);
             grpRules.Controls.Add(btnRemoveRule);
             grpRules.Controls.Add(btnPreview);
-            grpRules.Location = new Point(462, 67);
+            grpRules.Dock = DockStyle.Fill;
+            grpRules.Location = new Point(0, 0);
             grpRules.Name = "grpRules";
-            grpRules.Size = new Size(322, 478);
+            grpRules.Size = new Size(326, 465);
             grpRules.TabIndex = 8;
             grpRules.TabStop = false;
             grpRules.Text = "Removal rules";
@@ -156,7 +163,7 @@
             // lblPattern
             // 
             lblPattern.AutoSize = true;
-            lblPattern.Location = new Point(12, 27);
+            lblPattern.Location = new Point(12, 19);
             lblPattern.Name = "lblPattern";
             lblPattern.Size = new Size(48, 15);
             lblPattern.TabIndex = 0;
@@ -165,15 +172,16 @@
             // txtPattern
             // 
             txtPattern.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtPattern.Location = new Point(12, 45);
+            txtPattern.Location = new Point(12, 37);
             txtPattern.Name = "txtPattern";
-            txtPattern.Size = new Size(298, 23);
+            txtPattern.Size = new Size(302, 23);
             txtPattern.TabIndex = 1;
+            txtPattern.KeyPress += txtPattern_KeyPress;
             // 
             // lblMatchType
             // 
             lblMatchType.AutoSize = true;
-            lblMatchType.Location = new Point(12, 78);
+            lblMatchType.Location = new Point(12, 71);
             lblMatchType.Name = "lblMatchType";
             lblMatchType.Size = new Size(70, 15);
             lblMatchType.TabIndex = 2;
@@ -181,9 +189,10 @@
             // 
             // cmbMatchType
             // 
+            cmbMatchType.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             cmbMatchType.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbMatchType.FormattingEnabled = true;
-            cmbMatchType.Location = new Point(87, 75);
+            cmbMatchType.Location = new Point(87, 66);
             cmbMatchType.Name = "cmbMatchType";
             cmbMatchType.Size = new Size(160, 23);
             cmbMatchType.TabIndex = 3;
@@ -191,7 +200,7 @@
             // btnAddRule
             // 
             btnAddRule.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnAddRule.Location = new Point(253, 74);
+            btnAddRule.Location = new Point(257, 66);
             btnAddRule.Name = "btnAddRule";
             btnAddRule.Size = new Size(57, 25);
             btnAddRule.TabIndex = 4;
@@ -205,16 +214,17 @@
             lstRules.CheckOnClick = true;
             lstRules.FormattingEnabled = true;
             lstRules.IntegralHeight = false;
-            lstRules.Location = new Point(12, 110);
+            lstRules.Location = new Point(12, 97);
             lstRules.Name = "lstRules";
-            lstRules.Size = new Size(298, 320);
+            lstRules.Size = new Size(302, 320);
             lstRules.TabIndex = 5;
             lstRules.ItemCheck += lstRules_ItemCheck;
+            lstRules.MouseUp += lstRules_MouseUp;
             // 
             // btnEditRule
             // 
             btnEditRule.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnEditRule.Location = new Point(12, 439);
+            btnEditRule.Location = new Point(12, 426);
             btnEditRule.Name = "btnEditRule";
             btnEditRule.Size = new Size(90, 27);
             btnEditRule.TabIndex = 6;
@@ -225,7 +235,7 @@
             // btnRemoveRule
             // 
             btnRemoveRule.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnRemoveRule.Location = new Point(108, 439);
+            btnRemoveRule.Location = new Point(108, 426);
             btnRemoveRule.Name = "btnRemoveRule";
             btnRemoveRule.Size = new Size(90, 27);
             btnRemoveRule.TabIndex = 7;
@@ -236,7 +246,7 @@
             // btnPreview
             // 
             btnPreview.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnPreview.Location = new Point(206, 439);
+            btnPreview.Location = new Point(210, 426);
             btnPreview.Name = "btnPreview";
             btnPreview.Size = new Size(104, 27);
             btnPreview.TabIndex = 8;
@@ -287,7 +297,7 @@
             // lblDomainFilter
             // 
             lblDomainFilter.AutoSize = true;
-            lblDomainFilter.Location = new Point(12, 70);
+            lblDomainFilter.Location = new Point(0, 3);
             lblDomainFilter.Name = "lblDomainFilter";
             lblDomainFilter.Size = new Size(36, 15);
             lblDomainFilter.TabIndex = 13;
@@ -304,21 +314,64 @@
             btnAbout.UseVisualStyleBackColor = true;
             btnAbout.Click += btnAbout_Click;
             // 
+            // btnCopyToPattern
+            // 
+            btnCopyToPattern.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCopyToPattern.Location = new Point(384, 0);
+            btnCopyToPattern.Name = "btnCopyToPattern";
+            btnCopyToPattern.Size = new Size(26, 23);
+            btnCopyToPattern.TabIndex = 15;
+            btnCopyToPattern.Text = "→";
+            btnCopyToPattern.UseVisualStyleBackColor = true;
+            btnCopyToPattern.Click += btnCopyToPattern_Click;
+            // 
+            // btnCopyToFilter
+            // 
+            btnCopyToFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCopyToFilter.Location = new Point(412, 0);
+            btnCopyToFilter.Name = "btnCopyToFilter";
+            btnCopyToFilter.Size = new Size(26, 23);
+            btnCopyToFilter.TabIndex = 16;
+            btnCopyToFilter.Text = "←";
+            btnCopyToFilter.UseVisualStyleBackColor = true;
+            btnCopyToFilter.Click += btnCopyToFilter_Click;
+            // 
+            // splitMain
+            // 
+            splitMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            splitMain.Location = new Point(12, 80);
+            splitMain.Name = "splitMain";
+            // 
+            // splitMain.Panel1
+            // 
+            splitMain.Panel1.Controls.Add(lstDomains);
+            splitMain.Panel1.Controls.Add(txtDomainFilter);
+            splitMain.Panel1.Controls.Add(btnCopyToPattern);
+            splitMain.Panel1.Controls.Add(btnCopyToFilter);
+            splitMain.Panel1.Controls.Add(lblDomainFilter);
+            splitMain.Panel1.Controls.Add(lblDomainsInfo);
+            splitMain.Panel1MinSize = 200;
+            // 
+            // splitMain.Panel2
+            // 
+            splitMain.Panel2.Controls.Add(grpRules);
+            splitMain.Panel2MinSize = 300;
+            splitMain.Size = new Size(772, 465);
+            splitMain.SplitterDistance = 440;
+            splitMain.SplitterWidth = 6;
+            splitMain.TabIndex = 15;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(796, 704);
-            Controls.Add(lblDomainFilter);
             Controls.Add(lblSourceUrl);
             Controls.Add(txtSourceUrl);
             Controls.Add(btnDownload);
             Controls.Add(btnLoadFile);
             Controls.Add(lblInfo);
-            Controls.Add(lblDomainsInfo);
-            Controls.Add(txtDomainFilter);
-            Controls.Add(lstDomains);
-            Controls.Add(grpRules);
+            Controls.Add(splitMain);
             Controls.Add(lblOutput);
             Controls.Add(txtOutputFile);
             Controls.Add(btnGenerate);
@@ -330,6 +383,11 @@
             Load += MainForm_Load;
             grpRules.ResumeLayout(false);
             grpRules.PerformLayout();
+            splitMain.Panel1.ResumeLayout(false);
+            splitMain.Panel1.PerformLayout();
+            splitMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)splitMain).EndInit();
+            splitMain.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -360,5 +418,8 @@
         private TextBox txtLog;
         private Label lblDomainFilter;
         private Button btnAbout;
+        private Button btnCopyToPattern;
+        private Button btnCopyToFilter;
+        private SplitContainer splitMain;
     }
 }

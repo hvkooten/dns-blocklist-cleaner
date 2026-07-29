@@ -17,6 +17,7 @@ namespace DNS_BlockList_Cleaner
         private BlocklistDocument? _document;
         private bool _suppressItemCheck;
         private int _editingIndex = -1;
+        private bool _previewActive;
 
         public MainForm()
         {
@@ -146,17 +147,64 @@ namespace DNS_BlockList_Cleaner
             Log($"Added rule: {pattern} ({matchType}).");
         }
 
+        private void txtPattern_KeyPress(object? sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '*')
+                cmbMatchType.SelectedItem = MatchType.Wildcard;
+        }
+
+        private void btnCopyToPattern_Click(object? sender, EventArgs e)
+        {
+            txtPattern.Text = txtDomainFilter.Text;
+        }
+
+        private void btnCopyToFilter_Click(object? sender, EventArgs e)
+        {
+            txtDomainFilter.Text = txtPattern.Text;
+        }
+
         private void btnEditRule_Click(object? sender, EventArgs e)
         {
+            if (_editingIndex >= 0)
+            {
+                EndEdit();
+                return;
+            }
+
             if (lstRules.SelectedIndex < 0
                 || lstRules.SelectedIndex >= _config.RemovalRules.Count)
                 return;
 
-            _editingIndex = lstRules.SelectedIndex;
-            RemovalRule rule = _config.RemovalRules[_editingIndex];
+            BeginEditRule(lstRules.SelectedIndex);
+        }
+
+        private void lstRules_MouseUp(object? sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            int index = lstRules.IndexFromPoint(e.Location);
+            if (index < 0 || index >= _config.RemovalRules.Count)
+                return;
+
+            if (index == _editingIndex)
+            {
+                EndEdit();
+                return;
+            }
+
+            lstRules.SelectedIndex = index;
+            BeginEditRule(index);
+        }
+
+        private void BeginEditRule(int index)
+        {
+            _editingIndex = index;
+            RemovalRule rule = _config.RemovalRules[index];
             txtPattern.Text = rule.Pattern;
             cmbMatchType.SelectedItem = rule.MatchType;
             btnAddRule.Text = "Update";
+            btnEditRule.Text = "Cancel edit";
             txtPattern.Focus();
         }
 
@@ -164,6 +212,7 @@ namespace DNS_BlockList_Cleaner
         {
             _editingIndex = -1;
             btnAddRule.Text = "Add";
+            btnEditRule.Text = "Edit";
             txtPattern.Clear();
         }
 
@@ -190,11 +239,27 @@ namespace DNS_BlockList_Cleaner
                 return;
             }
 
+            if (_previewActive)
+            {
+                ExitPreview();
+                return;
+            }
+
             List<string> matches = BlocklistService.FindMatches(
                 _document.Domains, _config.RemovalRules);
 
             ShowDomains(matches, $"Matched by rules: {matches.Count}");
             Log($"{matches.Count} domain(s) would be removed by the current rules.");
+
+            _previewActive = true;
+            btnPreview.Text = "Back to filter";
+        }
+
+        private void ExitPreview()
+        {
+            _previewActive = false;
+            btnPreview.Text = "Preview";
+            ApplyDomainFilter();
         }
 
         private async void btnGenerate_Click(object? sender, EventArgs e)
@@ -250,6 +315,17 @@ namespace DNS_BlockList_Cleaner
         }
 
         private void txtDomainFilter_TextChanged(object? sender, EventArgs e)
+        {
+            if (_previewActive)
+            {
+                _previewActive = false;
+                btnPreview.Text = "Preview";
+            }
+
+            ApplyDomainFilter();
+        }
+
+        private void ApplyDomainFilter()
         {
             if (_document is null)
                 return;
