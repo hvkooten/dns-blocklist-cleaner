@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <Company>Nodorum Solutio B.V.</Company>
     <Product>DNS-BlockList-Cleaner</Product>
     <Copyright>Copyright © Nodorum Solutio B.V.</Copyright>
@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Help\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Help\hagezi-help.md">
+      <LogicalName>hagezi-help.md</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

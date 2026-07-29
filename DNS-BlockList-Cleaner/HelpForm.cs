@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using Markdig;
 
 namespace DNS_BlockList_Cleaner
@@ -20,19 +21,9 @@ namespace DNS_BlockList_Cleaner
         {
             try
             {
-                string helpDir = Path.Combine(AppContext.BaseDirectory, "Help");
-                string markdownPath = Path.Combine(helpDir, "hagezi-help.md");
-                string markdown = File.ReadAllText(markdownPath);
-
+                string markdown = ReadEmbeddedHelp();
                 string body = Markdown.ToHtml(markdown, Pipeline);
-                string html = BuildHtmlDocument(body);
-
-                // Write the rendered page next to the images so relative image
-                // references (e.g. blocking-level.png) resolve correctly.
-                string htmlPath = Path.Combine(helpDir, "hagezi-help.generated.html");
-                File.WriteAllText(htmlPath, html);
-
-                webHelp.Url = new Uri(htmlPath);
+                webHelp.DocumentText = BuildHtmlDocument(body);
             }
             catch (Exception ex)
             {
@@ -41,6 +32,16 @@ namespace DNS_BlockList_Cleaner
                     $"<p>Could not load the help page:</p>" +
                     $"<pre>{WebUtility.HtmlEncode(ex.Message)}</pre></body></html>";
             }
+        }
+
+        private static string ReadEmbeddedHelp()
+        {
+            Assembly assembly = typeof(HelpForm).Assembly;
+            using Stream? stream = assembly.GetManifestResourceStream("hagezi-help.md")
+                ?? throw new FileNotFoundException(
+                    "Embedded help resource 'hagezi-help.md' was not found.");
+            using StreamReader reader = new(stream);
+            return reader.ReadToEnd();
         }
 
         private void WebHelp_Navigating(object? sender, WebBrowserNavigatingEventArgs e)
