@@ -52,10 +52,12 @@ jobs:
 
     # Publish the application (self-contained, single-file)
     - name: Publish the application
+      if: matrix.configuration == 'Release'
       run: dotnet publish $env:App_Project_Path --configuration ${{ matrix.configuration }} --runtime win-x64 --self-contained true -p:PublishSingleFile=true --output publish
 
     # Upload the published output: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
+      if: matrix.configuration == 'Release'
       uses: actions/upload-artifact@v4
       with:
         name: DNS-BlockList-Cleaner-${{ matrix.configuration }}
