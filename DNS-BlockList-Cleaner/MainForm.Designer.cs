@@ -29,6 +29,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            lblPreset = new Label();
+            cmbPreset = new ComboBox();
             lblSourceUrl = new Label();
             txtSourceUrl = new TextBox();
             btnDownload = new Button();
@@ -53,6 +55,7 @@
             txtLog = new TextBox();
             lblDomainFilter = new Label();
             btnAbout = new Button();
+            btnHelp = new Button();
             btnCopyToPattern = new Button();
             btnCopyToFilter = new Button();
             splitMain = new SplitContainer();
@@ -63,30 +66,50 @@
             splitMain.SuspendLayout();
             SuspendLayout();
             // 
+            // lblPreset
+            // 
+            lblPreset.AutoSize = true;
+            lblPreset.Location = new Point(12, 15);
+            lblPreset.Name = "lblPreset";
+            lblPreset.Size = new Size(67, 15);
+            lblPreset.TabIndex = 0;
+            lblPreset.Text = "HaGeZi list:";
+            // 
+            // cmbPreset
+            // 
+            cmbPreset.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            cmbPreset.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbPreset.FormattingEnabled = true;
+            cmbPreset.Location = new Point(87, 12);
+            cmbPreset.Name = "cmbPreset";
+            cmbPreset.Size = new Size(697, 23);
+            cmbPreset.TabIndex = 1;
+            cmbPreset.SelectedIndexChanged += cmbPreset_SelectedIndexChanged;
+            // 
             // lblSourceUrl
             // 
             lblSourceUrl.AutoSize = true;
-            lblSourceUrl.Location = new Point(12, 15);
+            lblSourceUrl.Location = new Point(12, 48);
             lblSourceUrl.Name = "lblSourceUrl";
             lblSourceUrl.Size = new Size(70, 15);
-            lblSourceUrl.TabIndex = 0;
+            lblSourceUrl.TabIndex = 2;
             lblSourceUrl.Text = "Source URL:";
             // 
             // txtSourceUrl
             // 
             txtSourceUrl.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtSourceUrl.Location = new Point(87, 12);
+            txtSourceUrl.Location = new Point(87, 45);
             txtSourceUrl.Name = "txtSourceUrl";
             txtSourceUrl.Size = new Size(505, 23);
-            txtSourceUrl.TabIndex = 1;
+            txtSourceUrl.TabIndex = 3;
             // 
             // btnDownload
             // 
             btnDownload.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnDownload.Location = new Point(598, 11);
+            btnDownload.Location = new Point(598, 44);
             btnDownload.Name = "btnDownload";
             btnDownload.Size = new Size(90, 25);
-            btnDownload.TabIndex = 2;
+            btnDownload.TabIndex = 4;
             btnDownload.Text = "Download";
             btnDownload.UseVisualStyleBackColor = true;
             btnDownload.Click += btnDownload_Click;
@@ -94,10 +117,10 @@
             // btnLoadFile
             // 
             btnLoadFile.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnLoadFile.Location = new Point(694, 11);
+            btnLoadFile.Location = new Point(694, 44);
             btnLoadFile.Name = "btnLoadFile";
             btnLoadFile.Size = new Size(90, 25);
-            btnLoadFile.TabIndex = 3;
+            btnLoadFile.TabIndex = 5;
             btnLoadFile.Text = "Load file...";
             btnLoadFile.UseVisualStyleBackColor = true;
             btnLoadFile.Click += btnLoadFile_Click;
@@ -106,10 +129,10 @@
             // 
             lblInfo.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             lblInfo.AutoEllipsis = true;
-            lblInfo.Location = new Point(12, 43);
+            lblInfo.Location = new Point(12, 76);
             lblInfo.Name = "lblInfo";
             lblInfo.Size = new Size(772, 34);
-            lblInfo.TabIndex = 4;
+            lblInfo.TabIndex = 6;
             lblInfo.Text = "No blocklist loaded.";
             // 
             // lblDomainsInfo
@@ -258,7 +281,7 @@
             // 
             lblOutput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             lblOutput.AutoSize = true;
-            lblOutput.Location = new Point(12, 557);
+            lblOutput.Location = new Point(12, 590);
             lblOutput.Name = "lblOutput";
             lblOutput.Size = new Size(67, 15);
             lblOutput.TabIndex = 9;
@@ -267,15 +290,15 @@
             // txtOutputFile
             // 
             txtOutputFile.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            txtOutputFile.Location = new Point(95, 554);
+            txtOutputFile.Location = new Point(95, 587);
             txtOutputFile.Name = "txtOutputFile";
-            txtOutputFile.Size = new Size(355, 23);
+            txtOutputFile.Size = new Size(331, 23);
             txtOutputFile.TabIndex = 10;
             // 
             // btnGenerate
             // 
             btnGenerate.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnGenerate.Location = new Point(624, 551);
+            btnGenerate.Location = new Point(624, 584);
             btnGenerate.Name = "btnGenerate";
             btnGenerate.Size = new Size(160, 27);
             btnGenerate.TabIndex = 11;
@@ -286,7 +309,7 @@
             // txtLog
             // 
             txtLog.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            txtLog.Location = new Point(12, 584);
+            txtLog.Location = new Point(12, 617);
             txtLog.Multiline = true;
             txtLog.Name = "txtLog";
             txtLog.ReadOnly = true;
@@ -306,13 +329,24 @@
             // btnAbout
             // 
             btnAbout.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnAbout.Location = new Point(528, 551);
+            btnAbout.Location = new Point(528, 584);
             btnAbout.Name = "btnAbout";
             btnAbout.Size = new Size(90, 27);
             btnAbout.TabIndex = 14;
             btnAbout.Text = "About...";
             btnAbout.UseVisualStyleBackColor = true;
             btnAbout.Click += btnAbout_Click;
+            // 
+            // btnHelp
+            // 
+            btnHelp.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnHelp.Location = new Point(432, 584);
+            btnHelp.Name = "btnHelp";
+            btnHelp.Size = new Size(90, 27);
+            btnHelp.TabIndex = 17;
+            btnHelp.Text = "Help...";
+            btnHelp.UseVisualStyleBackColor = true;
+            btnHelp.Click += btnHelp_Click;
             // 
             // btnCopyToPattern
             // 
@@ -339,7 +373,7 @@
             // splitMain
             // 
             splitMain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            splitMain.Location = new Point(12, 80);
+            splitMain.Location = new Point(12, 113);
             splitMain.Name = "splitMain";
             // 
             // splitMain.Panel1
@@ -365,7 +399,9 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(796, 704);
+            ClientSize = new Size(796, 737);
+            Controls.Add(lblPreset);
+            Controls.Add(cmbPreset);
             Controls.Add(lblSourceUrl);
             Controls.Add(txtSourceUrl);
             Controls.Add(btnDownload);
@@ -377,7 +413,8 @@
             Controls.Add(btnGenerate);
             Controls.Add(txtLog);
             Controls.Add(btnAbout);
-            MinimumSize = new Size(700, 500);
+            Controls.Add(btnHelp);
+            MinimumSize = new Size(700, 533);
             Name = "MainForm";
             Text = "DNS-BlockList-Cleaner";
             Load += MainForm_Load;
@@ -394,6 +431,8 @@
 
         #endregion
 
+        private Label lblPreset;
+        private ComboBox cmbPreset;
         private Label lblSourceUrl;
         private TextBox txtSourceUrl;
         private Button btnDownload;
@@ -418,6 +457,7 @@
         private TextBox txtLog;
         private Label lblDomainFilter;
         private Button btnAbout;
+        private Button btnHelp;
         private Button btnCopyToPattern;
         private Button btnCopyToFilter;
         private SplitContainer splitMain;

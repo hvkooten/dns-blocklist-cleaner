@@ -7,6 +7,18 @@ namespace DNS_BlockList_Cleaner
     {
         private const int MaxDomainsShown = 5000;
 
+        private const string HaGeZiWildcardBase =
+            "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/";
+
+        private static readonly BlocklistPreset[] HaGeZiPresets =
+        [
+            new("Light (lite) - minimal blocking", $"{HaGeZiWildcardBase}light-onlydomains.txt"),
+            new("Multi NORMAL (pro) - recommended", $"{HaGeZiWildcardBase}pro-onlydomains.txt"),
+            new("Multi PLUS (pro++) - aggressive", $"{HaGeZiWildcardBase}pro.plus-onlydomains.txt"),
+            new("Multi ULTIMATE - maximum blocking", $"{HaGeZiWildcardBase}ultimate-onlydomains.txt"),
+            new("Fake - anti fraud/phishing", $"{HaGeZiWildcardBase}fake-onlydomains.txt"),
+        ];
+
         private readonly string _dataDirectory;
         private readonly string _configPath;
         private readonly string _statePath;
@@ -16,6 +28,7 @@ namespace DNS_BlockList_Cleaner
         private AppState _state = new();
         private BlocklistDocument? _document;
         private bool _suppressItemCheck;
+        private bool _suppressPresetChange;
         private int _editingIndex = -1;
         private bool _previewActive;
 
@@ -47,6 +60,7 @@ namespace DNS_BlockList_Cleaner
 
             txtSourceUrl.Text = _config.SourceUrl;
             txtOutputFile.Text = _config.OutputFileName;
+            InitializePresets();
             RefreshRules();
 
             if (!string.IsNullOrEmpty(_state.LastProcessedVersion))
@@ -465,5 +479,39 @@ namespace DNS_BlockList_Cleaner
             using AboutForm about = new();
             about.ShowDialog(this);
         }
+
+        private void btnHelp_Click(object? sender, EventArgs e)
+        {
+            using HelpForm help = new();
+            help.ShowDialog(this);
+        }
+
+        private void InitializePresets()
+        {
+            _suppressPresetChange = true;
+            cmbPreset.DisplayMember = nameof(BlocklistPreset.Name);
+            cmbPreset.DataSource = HaGeZiPresets;
+
+            int match = Array.FindIndex(
+                HaGeZiPresets,
+                p => string.Equals(p.Url, txtSourceUrl.Text.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+            cmbPreset.SelectedIndex = match >= 0 ? match : -1;
+            _suppressPresetChange = false;
+        }
+
+        private void cmbPreset_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_suppressPresetChange
+                || cmbPreset.SelectedItem is not BlocklistPreset preset)
+                return;
+
+            txtSourceUrl.Text = preset.Url;
+            _config = _config with { SourceUrl = preset.Url };
+            SaveConfig();
+            Log($"Selected HaGeZi list: {preset.Name}.");
+        }
+
+        private sealed record BlocklistPreset(string Name, string Url);
     }
 }
