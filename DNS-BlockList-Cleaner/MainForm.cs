@@ -383,5 +383,11 @@ namespace DNS_BlockList_Cleaner
         {
             txtLog.AppendText($"{DateTime.Now:HH:mm:ss}  {message}{Environment.NewLine}");
         }
+
+        private void btnAbout_Click(object? sender, EventArgs e)
+        {
+            using AboutForm about = new();
+            about.ShowDialog(this);
+        }
     }
 }

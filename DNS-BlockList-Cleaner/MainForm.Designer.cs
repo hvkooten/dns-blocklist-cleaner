@@ -52,6 +52,7 @@
             btnGenerate = new Button();
             txtLog = new TextBox();
             lblDomainFilter = new Label();
+            btnAbout = new Button();
             grpRules.SuspendLayout();
             SuspendLayout();
             // 
@@ -292,6 +293,17 @@
             lblDomainFilter.TabIndex = 13;
             lblDomainFilter.Text = "Filter:";
             // 
+            // btnAbout
+            // 
+            btnAbout.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnAbout.Location = new Point(528, 551);
+            btnAbout.Name = "btnAbout";
+            btnAbout.Size = new Size(90, 27);
+            btnAbout.TabIndex = 14;
+            btnAbout.Text = "About...";
+            btnAbout.UseVisualStyleBackColor = true;
+            btnAbout.Click += btnAbout_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -311,6 +323,7 @@
             Controls.Add(txtOutputFile);
             Controls.Add(btnGenerate);
             Controls.Add(txtLog);
+            Controls.Add(btnAbout);
             MinimumSize = new Size(700, 500);
             Name = "MainForm";
             Text = "DNS-BlockList-Cleaner";
@@ -346,5 +359,6 @@
         private Button btnGenerate;
         private TextBox txtLog;
         private Label lblDomainFilter;
+        private Button btnAbout;
     }
 }

@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Version>1.1.0</Version>
+    <Company>Nodorum Solutio B.V.</Company>
+    <Product>DNS-BlockList-Cleaner</Product>
+    <Copyright>Copyright © Nodorum Solutio B.V.</Copyright>
   </PropertyGroup>
 
 </Project>
