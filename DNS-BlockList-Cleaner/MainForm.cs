@@ -31,7 +31,7 @@ namespace DNS_BlockList_Cleaner
 
         private async void MainForm_Load(object? sender, EventArgs e)
         {
-            cmbMatchType.DataSource = Enum.GetValues<Models.MatchType>();
+            cmbMatchType.DataSource = Enum.GetValues<MatchType>();
 
             try
             {
@@ -104,8 +104,8 @@ namespace DNS_BlockList_Cleaner
                 return;
             }
 
-            Models.MatchType matchType = cmbMatchType.SelectedItem is Models.MatchType mt
-                ? mt : Models.MatchType.Contains;
+            MatchType matchType = cmbMatchType.SelectedItem is MatchType mt
+                ? mt : MatchType.Contains;
 
             bool exists = _config.RemovalRules
                 .Where((_, i) => i != _editingIndex)
@@ -263,7 +263,7 @@ namespace DNS_BlockList_Cleaner
             else if (filter.Contains('*') || filter.Contains('?'))
             {
                 source = _document.Domains.Where(d =>
-                    DomainMatcher.Matches(d, filter, Models.MatchType.Wildcard));
+                    DomainMatcher.Matches(d, filter, MatchType.Wildcard));
             }
             else
             {

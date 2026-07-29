@@ -7,5 +7,6 @@
     <File Path=".gitignore" />
     <File Path="LICENSE" />
   </Folder>
+  <Project Path="DNS-BlockList-Cleaner.Tests/DNS-BlockList-Cleaner.Tests.csproj" />
   <Project Path="DNS-BlockList-Cleaner/DNS-BlockList-Cleaner.csproj" />
 </Solution>
