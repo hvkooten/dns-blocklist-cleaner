@@ -3,7 +3,7 @@
 [![Build status](https://github.com/hvkooten/dns-blocklist-cleaner/actions/workflows/dotnet-desktop.yml/badge.svg?branch=main)](https://github.com/hvkooten/dns-blocklist-cleaner/actions/workflows/dotnet-desktop.yml)
 [![Latest release](https://img.shields.io/github/v/release/hvkooten/dns-blocklist-cleaner?label=stable&sort=semver)](https://github.com/hvkooten/dns-blocklist-cleaner/releases/latest)
 [![Latest pre-release](https://img.shields.io/github/v/release/hvkooten/dns-blocklist-cleaner?include_prereleases&label=beta&sort=semver)](https://github.com/hvkooten/dns-blocklist-cleaner/releases)
-[![License](https://img.shields.io/github/license/hvkooten/dns-blocklist-cleaner)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 
 A small Windows desktop tool (WinForms, .NET 10) that downloads the
 [HaGeZi DNS blocklist](https://github.com/hagezi/dns-blocklists), lets you review,
