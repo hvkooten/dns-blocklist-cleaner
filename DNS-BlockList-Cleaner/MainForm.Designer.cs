@@ -163,6 +163,7 @@
             lstDomains.Name = "lstDomains";
             lstDomains.Size = new Size(438, 421);
             lstDomains.TabIndex = 7;
+            lstDomains.DoubleClick += lstDomains_DoubleClick;
             // 
             // grpRules
             // 

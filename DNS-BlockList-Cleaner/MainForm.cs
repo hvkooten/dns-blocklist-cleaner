@@ -167,6 +167,15 @@ namespace DNS_BlockList_Cleaner
                 cmbMatchType.SelectedItem = MatchType.Wildcard;
         }
 
+        private void lstDomains_DoubleClick(object? sender, EventArgs e)
+        {
+            if (lstDomains.SelectedItem is not string domain || string.IsNullOrWhiteSpace(domain))
+                return;
+
+            txtPattern.Text = domain;
+            txtPattern.Focus();
+        }
+
         private void btnCopyToPattern_Click(object? sender, EventArgs e)
         {
             txtPattern.Text = txtDomainFilter.Text;
