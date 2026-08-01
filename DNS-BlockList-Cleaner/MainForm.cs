@@ -1,5 +1,6 @@
 using DNS_BlockList_Cleaner.Models;
 using DNS_BlockList_Cleaner.Services;
+using System.Diagnostics;
 
 namespace DNS_BlockList_Cleaner
 {
@@ -23,6 +24,7 @@ namespace DNS_BlockList_Cleaner
         private readonly string _configPath;
         private readonly string _statePath;
         private readonly HaGeZiUpdateService _updateService = new();
+        private readonly AppUpdateService _appUpdateService = new();
 
         private AppConfig _config = new();
         private AppState _state = new();
@@ -31,6 +33,8 @@ namespace DNS_BlockList_Cleaner
         private bool _suppressPresetChange;
         private int _editingIndex = -1;
         private bool _previewActive;
+        private bool _suppressAutoUpdateChange;
+        private int _lastLoggedProgress = -1;
 
         public MainForm()
         {
@@ -66,6 +70,22 @@ namespace DNS_BlockList_Cleaner
             if (!string.IsNullOrEmpty(_state.LastProcessedVersion))
                 Log($"Last processed version: {_state.LastProcessedVersion} " +
                     $"({_state.PreviousDomains.Count} domains remembered).");
+
+            _suppressAutoUpdateChange = true;
+            chkAutoUpdate.Checked = _config.CheckForUpdatesOnStartup;
+            _suppressAutoUpdateChange = false;
+
+            if (_config.CheckForUpdatesOnStartup)
+                await CheckForUpdatesAsync(silent: true).ConfigureAwait(true);
+        }
+
+        private void chkAutoUpdate_CheckedChanged(object? sender, EventArgs e)
+        {
+            if (_suppressAutoUpdateChange)
+                return;
+
+            _config = _config with { CheckForUpdatesOnStartup = chkAutoUpdate.Checked };
+            SaveConfig();
         }
 
         private async void btnDownload_Click(object? sender, EventArgs e)
@@ -493,6 +513,173 @@ namespace DNS_BlockList_Cleaner
         {
             using HelpForm help = new();
             help.ShowDialog(this);
+        }
+
+        private async void btnCheckUpdate_Click(object? sender, EventArgs e)
+        {
+            await CheckForUpdatesAsync(silent: false).ConfigureAwait(true);
+        }
+
+        private async Task CheckForUpdatesAsync(bool silent)
+        {
+            btnCheckUpdate.Enabled = false;
+            try
+            {
+                Log("Checking for updates...");
+
+                AppRelease? release = await _appUpdateService
+                    .GetLatestReleaseAsync()
+                    .ConfigureAwait(true);
+
+                if (release is null)
+                {
+                    Log("Could not determine the latest release.");
+                    if (!silent)
+                        MessageBox.Show(this,
+                            "Could not determine the latest release. Please try again later.",
+                            "Check for updates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                Version current = AppUpdateService.GetCurrentVersion();
+                if (release.Version <= current)
+                {
+                    Log($"You are running the latest version ({current}).");
+                    if (!silent)
+                        MessageBox.Show(this,
+                            $"You already have the latest version ({current}).",
+                            "Check for updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                Log($"A newer version is available: {release.Version} (current: {current}).");
+
+                DialogResult choice = MessageBox.Show(this,
+                    $"A newer version is available.\n\n" +
+                    $"Current version: {current}\n" +
+                    $"New version: {release.Version}\n\n" +
+                    "Download and install it now? The application will restart.",
+                    "Update available", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (choice != DialogResult.Yes)
+                    return;
+
+                await DownloadAndInstallAsync(release).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                Log($"Update check failed: {ex.Message}");
+                if (!silent)
+                    MessageBox.Show(this,
+                        $"The update could not be completed:\n{ex.Message}",
+                        "Check for updates", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnCheckUpdate.Enabled = true;
+            }
+        }
+
+        private async Task DownloadAndInstallAsync(AppRelease release)
+        {
+            string? currentExe = Environment.ProcessPath;
+            if (string.IsNullOrWhiteSpace(currentExe))
+            {
+                MessageBox.Show(this,
+                    "The running executable could not be located, so the update cannot be installed automatically.",
+                    "Update available", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string directory = Path.GetDirectoryName(currentExe)!;
+            string newExe = Path.Combine(directory, release.AssetName);
+
+            Log($"Downloading {release.AssetName}...");
+
+            Progress<double> progress = new(ReportDownloadProgress);
+            prgUpdate.Value = 0;
+            prgUpdate.Style = ProgressBarStyle.Blocks;
+            prgUpdate.Visible = true;
+            _lastLoggedProgress = -1;
+            try
+            {
+                await _appUpdateService.DownloadAsync(release, newExe, progress).ConfigureAwait(true);
+            }
+            finally
+            {
+                prgUpdate.Visible = false;
+            }
+
+            Log("Download complete. Restarting to apply the update...");
+
+            LaunchUpdater(currentExe, newExe);
+            Application.Exit();
+        }
+
+        private void ReportDownloadProgress(double fraction)
+        {
+            if (fraction < 0)
+            {
+                // Content length was unknown; show an indeterminate animation instead.
+                prgUpdate.Style = ProgressBarStyle.Marquee;
+                return;
+            }
+
+            prgUpdate.Style = ProgressBarStyle.Blocks;
+            int percent = Math.Clamp((int)(fraction * 100), 0, 100);
+            prgUpdate.Value = percent;
+
+            // Log every 10% milestone (and 100%) to keep the log readable.
+            int bucket = percent / 10;
+            if (bucket > _lastLoggedProgress / 10 || percent == 100)
+            {
+                Log($"Downloading update... {percent}%");
+                _lastLoggedProgress = percent;
+            }
+        }
+
+        private static void LaunchUpdater(string oldExe, string newExe)
+        {
+            string scriptPath = Path.Combine(Path.GetTempPath(),
+                $"dns-blocklist-cleaner-update-{Guid.NewGuid():N}.cmd");
+
+            bool sameFile = string.Equals(
+                Path.GetFullPath(oldExe), Path.GetFullPath(newExe), StringComparison.OrdinalIgnoreCase);
+
+            // Wait for this process to release its file lock, remove the old executable
+            // (unless the new download reused the same path), then start the new version.
+            string script;
+            if (sameFile)
+            {
+                script =
+                    "@echo off" + Environment.NewLine +
+                    "timeout /t 2 /nobreak >nul" + Environment.NewLine +
+                    $"start \"\" \"{newExe}\"" + Environment.NewLine +
+                    "del \"%~f0\" >nul 2>&1" + Environment.NewLine;
+            }
+            else
+            {
+                script =
+                    "@echo off" + Environment.NewLine +
+                    ":wait" + Environment.NewLine +
+                    "timeout /t 1 /nobreak >nul" + Environment.NewLine +
+                    $"del \"{oldExe}\" >nul 2>&1" + Environment.NewLine +
+                    $"if exist \"{oldExe}\" goto wait" + Environment.NewLine +
+                    $"start \"\" \"{newExe}\"" + Environment.NewLine +
+                    "del \"%~f0\" >nul 2>&1" + Environment.NewLine;
+            }
+
+            File.WriteAllText(scriptPath, script);
+
+            ProcessStartInfo startInfo = new()
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{scriptPath}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            Process.Start(startInfo);
         }
 
         private void InitializePresets()

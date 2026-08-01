@@ -18,4 +18,7 @@ public sealed record AppConfig
 
     /// <summary>Remembered removal rules that are re-applied to every new version.</summary>
     public List<RemovalRule> RemovalRules { get; init; } = [];
+
+    /// <summary>Whether to automatically check for application updates on startup.</summary>
+    public bool CheckForUpdatesOnStartup { get; init; } = true;
 }
