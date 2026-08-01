@@ -8,8 +8,9 @@ namespace DNS_BlockList_Cleaner
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
+            // DPI-aware rendering op alle schermresoluties
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+            Application.EnableVisualStyles();
             ApplicationConfiguration.Initialize();
             Application.Run(new MainForm());
         }
