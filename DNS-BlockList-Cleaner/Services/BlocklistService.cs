@@ -76,17 +76,25 @@ public static class BlocklistService
     }
 
     /// <summary>
-    /// Returns the domains that match at least one of the given removal rules.
+    /// Returns the domains that match at least one of the given removal rules,
+    /// excluding any domain listed in <paramref name="excludedDomains"/>.
     /// </summary>
     public static List<string> FindMatches(
-        IEnumerable<string> domains, IReadOnlyCollection<RemovalRule> rules)
+        IEnumerable<string> domains,
+        IReadOnlyCollection<RemovalRule> rules,
+        IReadOnlyCollection<string>? excludedDomains = null)
     {
         ArgumentNullException.ThrowIfNull(domains);
         ArgumentNullException.ThrowIfNull(rules);
 
+        HashSet<string> excluded = BuildExclusionSet(excludedDomains);
+
         List<string> result = [];
         foreach (string domain in domains)
         {
+            if (excluded.Contains(domain))
+                continue;
+
             foreach (RemovalRule rule in rules)
             {
                 if (rule.Enabled && DomainMatcher.Matches(domain, rule))
@@ -101,10 +109,13 @@ public static class BlocklistService
     }
 
     /// <summary>
-    /// Produces the cleaned list of domains with all removal rules applied.
+    /// Produces the cleaned list of domains with all removal rules applied,
+    /// keeping any domain listed in <paramref name="excludedDomains"/>.
     /// </summary>
     public static List<string> ApplyRemovals(
-        BlocklistDocument document, IReadOnlyCollection<RemovalRule> rules)
+        BlocklistDocument document,
+        IReadOnlyCollection<RemovalRule> rules,
+        IReadOnlyCollection<string>? excludedDomains = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(rules);
@@ -112,16 +123,21 @@ public static class BlocklistService
         if (rules.Count == 0)
             return [.. document.Domains];
 
+        HashSet<string> excluded = BuildExclusionSet(excludedDomains);
+
         List<string> kept = [];
         foreach (string domain in document.Domains)
         {
             bool remove = false;
-            foreach (RemovalRule rule in rules)
+            if (!excluded.Contains(domain))
             {
-                if (rule.Enabled && DomainMatcher.Matches(domain, rule))
+                foreach (RemovalRule rule in rules)
                 {
-                    remove = true;
-                    break;
+                    if (rule.Enabled && DomainMatcher.Matches(domain, rule))
+                    {
+                        remove = true;
+                        break;
+                    }
                 }
             }
 
@@ -131,6 +147,11 @@ public static class BlocklistService
 
         return kept;
     }
+
+    private static HashSet<string> BuildExclusionSet(IReadOnlyCollection<string>? excludedDomains)
+        => excludedDomains is null or { Count: 0 }
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            : new HashSet<string>(excludedDomains, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Writes domains to <paramref name="path"/> without any comments,

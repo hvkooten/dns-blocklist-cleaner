@@ -60,9 +60,14 @@
             btnCheckUpdate = new Button();
             prgUpdate = new ProgressBar();
             chkAutoUpdate = new CheckBox();
+            btnManageExclusions = new Button();
             btnCopyToPattern = new Button();
             btnCopyToFilter = new Button();
             splitMain = new SplitContainer();
+            components = new System.ComponentModel.Container();
+            ctxDomains = new ContextMenuStrip(components);
+            miExclude = new ToolStripMenuItem();
+            miInclude = new ToolStripMenuItem();
             grpRules.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitMain).BeginInit();
             splitMain.Panel1.SuspendLayout();
@@ -161,13 +166,38 @@
             // lstDomains
             // 
             lstDomains.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lstDomains.ContextMenuStrip = ctxDomains;
+            lstDomains.DrawMode = DrawMode.OwnerDrawFixed;
             lstDomains.FormattingEnabled = true;
             lstDomains.IntegralHeight = false;
             lstDomains.Location = new Point(0, 44);
             lstDomains.Name = "lstDomains";
+            lstDomains.SelectionMode = SelectionMode.MultiExtended;
             lstDomains.Size = new Size(404, 306);
             lstDomains.TabIndex = 7;
+            lstDomains.DrawItem += lstDomains_DrawItem;
             lstDomains.DoubleClick += lstDomains_DoubleClick;
+            // 
+            // ctxDomains
+            // 
+            ctxDomains.Items.AddRange(new ToolStripItem[] { miExclude, miInclude });
+            ctxDomains.Name = "ctxDomains";
+            ctxDomains.Size = new Size(320, 52);
+            ctxDomains.Opening += ctxDomains_Opening;
+            // 
+            // miExclude
+            // 
+            miExclude.Name = "miExclude";
+            miExclude.Size = new Size(319, 24);
+            miExclude.Text = "Exclude selected domain(s) from removal";
+            miExclude.Click += miExclude_Click;
+            // 
+            // miInclude
+            // 
+            miInclude.Name = "miInclude";
+            miInclude.Size = new Size(319, 24);
+            miInclude.Text = "Remove selected domain(s) from exclusions";
+            miInclude.Click += miInclude_Click;
             // 
             // grpRules
             // 
@@ -364,12 +394,23 @@
             btnCheckUpdate.UseVisualStyleBackColor = true;
             btnCheckUpdate.Click += btnCheckUpdate_Click;
             // 
+            // btnManageExclusions
+            // 
+            btnManageExclusions.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnManageExclusions.Location = new Point(342, 472);
+            btnManageExclusions.Name = "btnManageExclusions";
+            btnManageExclusions.Size = new Size(112, 26);
+            btnManageExclusions.TabIndex = 21;
+            btnManageExclusions.Text = "Exclusions...";
+            btnManageExclusions.UseVisualStyleBackColor = true;
+            btnManageExclusions.Click += btnManageExclusions_Click;
+            // 
             // prgUpdate
             // 
             prgUpdate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            prgUpdate.Location = new Point(347, 476);
+            prgUpdate.Location = new Point(464, 476);
             prgUpdate.Name = "prgUpdate";
-            prgUpdate.Size = new Size(377, 19);
+            prgUpdate.Size = new Size(260, 19);
             prgUpdate.TabIndex = 19;
             prgUpdate.Visible = false;
             // 
@@ -456,6 +497,7 @@
             Controls.Add(btnCheckUpdate);
             Controls.Add(prgUpdate);
             Controls.Add(chkAutoUpdate);
+            Controls.Add(btnManageExclusions);
             MinimumSize = new Size(698, 526);
             Name = "MainForm";
             Text = "DNS-BlockList-Cleaner";
@@ -503,8 +545,12 @@
         private Button btnCheckUpdate;
         private ProgressBar prgUpdate;
         private CheckBox chkAutoUpdate;
+        private Button btnManageExclusions;
         private Button btnCopyToPattern;
         private Button btnCopyToFilter;
         private SplitContainer splitMain;
+        private ContextMenuStrip ctxDomains;
+        private ToolStripMenuItem miExclude;
+        private ToolStripMenuItem miInclude;
     }
 }

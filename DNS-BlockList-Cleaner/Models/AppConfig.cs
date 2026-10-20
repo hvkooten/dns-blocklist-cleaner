@@ -19,6 +19,12 @@ public sealed record AppConfig
     /// <summary>Remembered removal rules that are re-applied to every new version.</summary>
     public List<RemovalRule> RemovalRules { get; init; } = [];
 
+    /// <summary>
+    /// Domains that must never be removed, even when a rule matches them.
+    /// Populated from the preview to fine-tune individual rule results.
+    /// </summary>
+    public List<string> ExcludedDomains { get; init; } = [];
+
     /// <summary>Whether to automatically check for application updates on startup.</summary>
     public bool CheckForUpdatesOnStartup { get; init; } = true;
 }

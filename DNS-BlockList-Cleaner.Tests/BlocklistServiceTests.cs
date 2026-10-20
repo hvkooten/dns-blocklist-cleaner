@@ -148,4 +148,79 @@ public class BlocklistServiceTests
             File.Delete(path);
         }
     }
+
+    [Fact]
+    public void FindMatches_ExcludesListedDomains()
+    {
+        BlocklistDocument doc = BlocklistService.Parse(Sample);
+        var rules = new[]
+        {
+            new RemovalRule { Pattern = "example", MatchType = MatchType.Contains }
+        };
+        string[] excluded = ["ads.example.com"];
+
+        List<string> matches = BlocklistService.FindMatches(doc.Domains, rules, excluded);
+
+        matches.Should().NotContain("ads.example.com");
+        matches.Should().Contain("tracker.example.net");
+    }
+
+    [Fact]
+    public void FindMatches_ExclusionIsCaseInsensitive()
+    {
+        BlocklistDocument doc = BlocklistService.Parse(Sample);
+        var rules = new[]
+        {
+            new RemovalRule { Pattern = "example", MatchType = MatchType.Contains }
+        };
+        string[] excluded = ["ADS.EXAMPLE.COM"];
+
+        List<string> matches = BlocklistService.FindMatches(doc.Domains, rules, excluded);
+
+        matches.Should().NotContain("ads.example.com");
+    }
+
+    [Fact]
+    public void ApplyRemovals_KeepsExcludedDomains()
+    {
+        BlocklistDocument doc = BlocklistService.Parse(Sample);
+        var rules = new[]
+        {
+            new RemovalRule { Pattern = "example", MatchType = MatchType.Contains }
+        };
+        string[] excluded = ["ads.example.com"];
+
+        List<string> kept = BlocklistService.ApplyRemovals(doc, rules, excluded);
+
+        kept.Should().Contain("ads.example.com");
+        kept.Should().NotContain("tracker.example.net");
+    }
+
+    [Fact]
+    public void ApplyRemovals_ExclusionIsCaseInsensitive()
+    {
+        BlocklistDocument doc = BlocklistService.Parse(Sample);
+        var rules = new[]
+        {
+            new RemovalRule { Pattern = "example", MatchType = MatchType.Contains }
+        };
+        string[] excluded = ["ADS.EXAMPLE.COM"];
+
+        List<string> kept = BlocklistService.ApplyRemovals(doc, rules, excluded);
+
+        kept.Should().Contain("ads.example.com");
+    }
+
+    [Fact]
+    public void ApplyRemovals_WithEmptyExclusions_BehavesLikeNoExclusions()
+    {
+        BlocklistDocument doc = BlocklistService.Parse(Sample);
+        var rules = new[]
+        {
+            new RemovalRule { Pattern = "example.com", MatchType = MatchType.ExactOrSubdomain }
+        };
+
+        BlocklistService.ApplyRemovals(doc, rules, [])
+            .Should().Equal("tracker.example.net", "spaced.example.org");
+    }
 }

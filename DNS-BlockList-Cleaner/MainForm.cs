@@ -288,14 +288,128 @@ namespace DNS_BlockList_Cleaner
                 return;
             }
 
-            List<string> matches = BlocklistService.FindMatches(
-                _document.Domains, _config.RemovalRules);
-
-            ShowDomains(matches, $"Matched by rules: {matches.Count}");
-            Log($"{matches.Count} domain(s) would be removed by the current rules.");
-
             _previewActive = true;
             btnPreview.Text = "Back to filter";
+            ShowPreview();
+        }
+
+        private void ShowPreview()
+        {
+            if (_document is null)
+                return;
+
+            List<string> matches = BlocklistService.FindMatches(
+                _document.Domains, _config.RemovalRules, _config.ExcludedDomains);
+
+            string label = $"Matched by rules: {matches.Count}";
+            if (_config.ExcludedDomains.Count > 0)
+                label += $"  |  Excluded: {_config.ExcludedDomains.Count}";
+
+            ShowDomains(matches, label);
+            Log($"{matches.Count} domain(s) would be removed by the current rules.");
+        }
+
+        private void ctxDomains_Opening(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (lstDomains.SelectedItems.Count == 0)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            HashSet<string> excluded = new(_config.ExcludedDomains, StringComparer.OrdinalIgnoreCase);
+            List<string> selected = [.. lstDomains.SelectedItems.Cast<string>()];
+
+            miExclude.Enabled = selected.Any(d => !excluded.Contains(d));
+            miInclude.Enabled = selected.Any(excluded.Contains);
+        }
+
+        private void miExclude_Click(object? sender, EventArgs e)
+        {
+            List<string> selected = [.. lstDomains.SelectedItems.Cast<string>()];
+            if (selected.Count == 0)
+                return;
+
+            HashSet<string> excluded = new(_config.ExcludedDomains, StringComparer.OrdinalIgnoreCase);
+            int added = selected.Count(excluded.Add);
+            if (added == 0)
+                return;
+
+            _config = _config with { ExcludedDomains = [.. excluded] };
+            SaveConfig();
+            Log($"Excluded {added} domain(s) from removal.");
+
+            lstDomains.Invalidate();
+            if (_previewActive)
+                ShowPreview();
+        }
+
+        private void miInclude_Click(object? sender, EventArgs e)
+        {
+            List<string> selected = [.. lstDomains.SelectedItems.Cast<string>()];
+            if (selected.Count == 0)
+                return;
+
+            HashSet<string> excluded = new(_config.ExcludedDomains, StringComparer.OrdinalIgnoreCase);
+            int removed = selected.Count(excluded.Remove);
+            if (removed == 0)
+                return;
+
+            _config = _config with { ExcludedDomains = [.. excluded] };
+            SaveConfig();
+            Log($"Removed {removed} domain(s) from exclusions.");
+
+            lstDomains.Invalidate();
+            if (_previewActive)
+                ShowPreview();
+        }
+
+        private void lstDomains_DrawItem(object? sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0)
+                return;
+
+            e.DrawBackground();
+
+            string domain = lstDomains.Items[e.Index]?.ToString() ?? string.Empty;
+            bool isExcluded = _config.ExcludedDomains.Contains(domain, StringComparer.OrdinalIgnoreCase);
+            bool isSelected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+
+            Color foreColor = isExcluded
+                ? (isSelected ? Color.Gold : Color.DarkOrange)
+                : e.ForeColor;
+
+            using Font font = isExcluded
+                ? new Font(e.Font!, FontStyle.Strikeout)
+                : new Font(e.Font!, FontStyle.Regular);
+
+            TextRenderer.DrawText(e.Graphics, domain, font, e.Bounds, foreColor,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+
+            e.DrawFocusRectangle();
+        }
+
+        private void btnManageExclusions_Click(object? sender, EventArgs e)
+        {
+            using ExclusionsForm dialog = new(_config.ExcludedDomains);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            List<string> remaining = [.. dialog.ExcludedDomains];
+            if (remaining.Count == _config.ExcludedDomains.Count &&
+                remaining.All(d => _config.ExcludedDomains.Contains(d, StringComparer.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            int removed = _config.ExcludedDomains.Count - remaining.Count;
+            _config = _config with { ExcludedDomains = remaining };
+            SaveConfig();
+            Log($"Removed {removed} domain(s) from exclusions.");
+
+            lstDomains.Invalidate();
+            if (_previewActive)
+                ShowPreview();
         }
 
         private void ExitPreview()
@@ -335,7 +449,7 @@ namespace DNS_BlockList_Cleaner
             await RunBusyAsync(async () =>
             {
                 List<string> kept = BlocklistService.ApplyRemovals(
-                    _document, _config.RemovalRules);
+                    _document, _config.RemovalRules, _config.ExcludedDomains);
 
                 await BlocklistService.WriteAsync(dialog.FileName, kept)
                     .ConfigureAwait(true);
